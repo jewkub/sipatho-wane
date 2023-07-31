@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>แลกเวร</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <h1>แลกเวร</h1>
+      <form action="/add" method="post" enctype="application/x-www-form-urlencoded" id="form">
+        <div class="accordion mb-3" id="requests"></div>
+        <div class="mb-3">
+          <button type="button" class="btn btn-secondary" onclick="add()">+</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script>
+      /**
+       * @param {String} HTML representing a single element
+       * @return {Element}
+       * https://stackoverflow.com/a/35385518/4468834
+       */
+      function htmlToElement(html) {
+        let template = document.createElement('template')
+        html = html.trim() // Never return a text node of whitespace as the result
+        template.innerHTML = html
+        return template.content.firstChild
+      }
+      const byId = 'getElementById'
+      const DateFormat = date => new Intl.DateTimeFormat('en-GB', {
+        day: 'numeric',
+        year: '2-digit',
+        month: 'short'
+      }).format(new Date(date))
+
+      let cnt = 0
+      const add = () => {
+        [...document.querySelectorAll('.collapse')]
+          .map(collapseEl => new bootstrap.Collapse(collapseEl, {toggle: false}))
+          .forEach(e => e.hide())
+
+        const cur = ++cnt
+        document[byId]('requests').append(htmlToElement(
+`<div class="accordion-item">
+  <h2 class="accordion-header">
+    <button class="accordion-button" type="button" id="btn${cur}" data-bs-toggle="collapse" data-bs-target="#collapse${cur}" aria-expanded="true" aria-controls="collapse${cur}">
+      # ${cur}
+    </button>
+  </h2>
+  <div id="collapse${cur}" class="accordion-collapse collapse" data-bs-parent="#requests">
+    <div class="accordion-body">
+      <h5 style="color: blue" id="request${cur}Title">ผู้ขอแลก</h5>
+      <div class="mb-3">
+        <label for="request${cur}Date" class="form-label">วันที่</label>
+        <input type="date" class="form-control" name="[${cur}][requestDate]" id="request${cur}Date" required>
+      </div>
+      <div class="mb-3">
+        <label for="request${cur}Subspe" class="form-label">subspe</label>
+        <select class="form-select" aria-label="Request Subspe" name="[${cur}][requestSubspe]" id="request${cur}Subspe" required>
+          <option disabled selected value="">เลือก sub</option>
+        </select>
+      </div>
+      <input type="text" class="form-control" name="[${cur}][requestName]" id="request${cur}Name" style="display: none;">
+      <hr/>
+      <h5 style="color: orange" id="response${cur}Title">ผู้รับแลก</h5>
+      <div class="mb-3">
+        <label for="response${cur}Date" class="form-label">วันที่</label>
+        <input type="date" class="form-control" name="[${cur}][responseDate]" id="response${cur}Date" required>
+      </div>
+      <div class="mb-3">
+        <label for="response${cur}Subspe" class="form-label">subspe</label>
+        <select class="form-select" aria-label="Response Subspe" name="[${cur}][responseSubspe]" id="response${cur}Subspe" required>
+          <option disabled selected value="">เลือก sub</option>
+        </select>
+      </div>
+      <input type="text" class="form-control" name="[${cur}][responseName]" id="response${cur}Name" style="display: none;">
+    </div>
+  </div>
+</div>`
+))
+        new bootstrap.Collapse(document[byId](`collapse${cur}`));
+
+        (list => list.forEach(e => {
+          let option = document.createElement('option')
+          option.value = e
+          option.textContent = e
+          document[byId](`request${cur}Subspe`).appendChild(option.cloneNode(true))
+          document[byId](`response${cur}Subspe`).appendChild(option.cloneNode(true))
+        }))([
+          'Renal biopsy',
+          'Nervous system',
+          'Eye (part-time)',
+          'Eye',
+          'KUB (part-time)',
+          'KUB (kidney, prostate, bladder)',
+          'Adrenal gland',
+          'Pediatric tumor',
+          'Neuroblastoma',
+          'Thyroid + Parathyroid',
+          'ENT',
+          'Breast 1 (Simple)',
+          'Breast (Simple) ที่เหลือ',
+          'Breast 2 (Advance)',
+          'Breast 3 (Core biopsy)',
+          'INTERSEX',
+          'Placenta',
+          'Gyne 1 (MH 1)',
+          'Gyne 1 (MH 2)',
+          'Gyne 2 (Medium 1)',
+          'Gyne 2 (Medium 2)',
+          'Gyne 3 (Small 1)',
+          'Gyne 3 (Small 2)',
+          'Gyne ที่เหลือ',
+          'Gyn Non-malignant tumor',
+          'Skin (ตจวิทยา)(part-time)',
+          'Skin (นอกตจวิทยา)(part-time)',
+          'Skin (ตจวิทยา)',
+          'Skin (นอกตจวิทยา) ที่เหลือ',
+          'LN, Spleen, Hemato, BM',
+          'Mediastinum, Thymus',
+          'Heart valve, aorta, หลอดเลือด',
+          'Lung',
+          'Cardiac bx, Transplant',
+          'Bone, Soft tissue, ขาเน่า',
+          'GI กลาง-ใหญ่',
+          'Appendix, GB, Colectomy',
+          'GI biopsy',
+          'GI กลาง-ใหญ่ ที่เหลือ',
+          'Appendix, GB, Colectomy ที่เหลือ',
+          'GI biopsy ที่เหลือ',
+          'Liver biopsy',
+        ])
+
+        const handleChange = async type => {
+          const requestDate = document[byId](`request${cur}Date`).value
+          const requestSubspe = document[byId](`request${cur}Subspe`).value
+          const responseDate = document[byId](`response${cur}Date`).value
+          const responseSubspe = document[byId](`response${cur}Subspe`).value
+          const requestTitle = document[byId](`request${cur}Title`)
+          const responseTitle = document[byId](`response${cur}Title`)
+          const btn = document[byId](`btn${cur}`)
+          const requestName = document[byId](`request${cur}Name`)
+          const responseName = document[byId](`response${cur}Name`)
+
+          if (type == 'req') {
+            if (!requestDate || !requestSubspe) {
+              requestTitle.innerText = `ผู้ขอแลก`
+              requestName.value = ''
+              btn.innerText = `# ${cur}`
+              return ;
+            }
+            requestTitle.innerText = `ผู้ขอแลก - ⏳`
+            const getName = await (await fetch('/name?' + new URLSearchParams({
+              date: requestDate,
+              subspe: requestSubspe,
+            }))).text()
+            if (getName == 'N/A') {
+              requestTitle.innerText = `ผู้ขอแลก - [ไม่พบ]`
+              requestName.value = ''
+              btn.innerText = `# ${cur}`
+              return ;
+            }
+            requestTitle.innerText = `ผู้ขอแลก - ${getName}`
+            requestName.value = getName
+            if (responseName.value) btn.innerText = `# ${cur}: ${getName}, ${DateFormat(requestDate)} ↔ ${responseName.value}, ${DateFormat(responseDate)}`
+          }
+          else if (type == 'res') {
+            if (!responseDate || !responseSubspe) {
+              responseTitle.innerText = `ผู้รับแลก`
+              responseName.value = ''
+              btn.innerText = `# ${cur}`
+              return ;
+            }
+            responseTitle.innerText = `ผู้รับแลก - ⏳`
+            const getName = await (await fetch('/name?' + new URLSearchParams({
+              date: responseDate,
+              subspe: responseSubspe,
+            }))).text()
+            if (getName == 'N/A') {
+              responseTitle.innerText = `ผู้รับแลก - [ไม่พบ]`
+              responseName.value = ''
+              btn.innerText = `# ${cur}`
+              return ;
+            }
+            responseTitle.innerText = `ผู้รับแลก - ${getName}`
+            responseName.value = getName
+            if (requestName.value) btn.innerText = `# ${cur}: ${requestName.value}, ${DateFormat(requestDate)} ↔ ${getName}, ${DateFormat(responseDate)}`
+          }
+        }
+
+        document[byId](`request${cur}Date`).onchange = () => handleChange('req')
+        document[byId](`request${cur}Subspe`).onchange = () => handleChange('req')
+        document[byId](`response${cur}Date`).onchange = () => handleChange('res')
+        document[byId](`response${cur}Subspe`).onchange = () => handleChange('res')
+      }
+
+      // https://stackoverflow.com/a/7053197/4468834
+      (fn => { 
+        if (document.readyState !== 'loading') return fn()
+        document.addEventListener('DOMContentLoaded', fn)
+      })(() => {
+        add()
+      })
+    </script>
+  </body>
+</html>
