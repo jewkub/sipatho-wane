@@ -10,6 +10,7 @@
     <div class="container">
       <h1>แลกเวร</h1>
       <form action="/add" method="post" enctype="application/x-www-form-urlencoded" id="form">
+        <input type="text" value="Surgical S, SG, SP" style="display: none;" name="hospital" id="hospital" readonly required />
         <div class="accordion mb-3" id="requests"></div>
         <div class="mb-3">
           <button type="button" class="btn btn-secondary" onclick="add()">+</button>
@@ -54,30 +55,34 @@
   <div id="collapse${cur}" class="accordion-collapse collapse" data-bs-parent="#requests">
     <div class="accordion-body">
       <h5 style="color: blue" id="request${cur}Title">ผู้ขอแลก</h5>
-      <div class="mb-3">
-        <label for="request${cur}Date" class="form-label">วันที่</label>
-        <input type="date" class="form-control" name="[${cur}][requestDate]" id="request${cur}Date" required>
+      <div class="row">
+        <div class="mb-3 col-12 col-md-6">
+          <label for="request${cur}Date" class="form-label">วันที่</label>
+          <input type="date" class="form-control" name="values[${cur}][requestDate]" id="request${cur}Date" required>
+        </div>
+        <div class="mb-3 col-12 col-md-6">
+          <label for="request${cur}Subspe" class="form-label">subspe</label>
+          <select class="form-select" aria-label="Request Subspe" name="values[${cur}][requestSubspe]" id="request${cur}Subspe" required>
+            <option disabled selected value="">เลือก sub</option>
+          </select>
+        </div>
       </div>
-      <div class="mb-3">
-        <label for="request${cur}Subspe" class="form-label">subspe</label>
-        <select class="form-select" aria-label="Request Subspe" name="[${cur}][requestSubspe]" id="request${cur}Subspe" required>
-          <option disabled selected value="">เลือก sub</option>
-        </select>
-      </div>
-      <input type="text" class="form-control" name="[${cur}][requestName]" id="request${cur}Name" style="display: none;">
+      <input type="text" class="form-control" name="values[${cur}][requestName]" id="request${cur}Name" style="display: none;">
       <hr/>
       <h5 style="color: orange" id="response${cur}Title">ผู้รับแลก</h5>
-      <div class="mb-3">
-        <label for="response${cur}Date" class="form-label">วันที่</label>
-        <input type="date" class="form-control" name="[${cur}][responseDate]" id="response${cur}Date" required>
+      <div class="row">
+        <div class="mb-3 col-12 col-md-6">
+          <label for="response${cur}Date" class="form-label">วันที่</label>
+          <input type="date" class="form-control" name="values[${cur}][responseDate]" id="response${cur}Date" required>
+        </div>
+        <div class="mb-3 col-12 col-md-6">
+          <label for="response${cur}Subspe" class="form-label">subspe</label>
+          <select class="form-select" aria-label="Response Subspe" name="values[${cur}][responseSubspe]" id="response${cur}Subspe" required>
+            <option disabled selected value="">เลือก sub</option>
+          </select>
+        </div>
       </div>
-      <div class="mb-3">
-        <label for="response${cur}Subspe" class="form-label">subspe</label>
-        <select class="form-select" aria-label="Response Subspe" name="[${cur}][responseSubspe]" id="response${cur}Subspe" required>
-          <option disabled selected value="">เลือก sub</option>
-        </select>
-      </div>
-      <input type="text" class="form-control" name="[${cur}][responseName]" id="response${cur}Name" style="display: none;">
+      <input type="text" class="form-control" name="values[${cur}][responseName]" id="response${cur}Name" style="display: none;">
     </div>
   </div>
 </div>`
