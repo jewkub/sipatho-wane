@@ -1,0 +1,52 @@
+<script lang="ts">
+	import { onMount } from 'svelte'
+	import { OptionList } from '../optionList'
+	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public'
+	import { Order } from '../order'
+	import OrderList from '../Order.svelte'
+	import { Form, Input, Label, Button, Col, Row, Container, Accordion, AccordionItem } from 'sveltestrap'
+
+	const hospital = 'Surgical S, SG, SP'
+	let list: Order[] = []
+
+	const add = () => {
+		list.forEach((e, i) => {
+			e.active = false
+		})
+		let order = new Order(list.length + 1)
+		list.push(order)
+		list = list
+	}
+
+	const remove = () => {
+		if (list.length == 0) throw new Error('cannot remove empty list')
+		list.pop()
+		list = list
+	}
+
+	onMount(() => {
+		add()
+	})
+</script>
+
+<svelte:head>
+	<title>SI - แลกเวรพาโถ</title>
+	<meta name="description" content="About this app" />
+</svelte:head>
+
+<Container>
+	<h1>แลกเวร - {hospital}</h1>
+	<Form action="{PUBLIC_BACKEND_HOSTNAME + 'add'}" method="post" enctype="application/x-www-form-urlencoded">
+		<Input type="text" value="Surgical S, SG, SP" style="display: none;" name="hospital" readonly required/>
+		<Accordion class="mb-3">
+			{#each list as e (e.index)}
+				<OrderList order={e} hospital={hospital}/>
+			{/each}
+		</Accordion>
+		<div class="mb-3">
+			<Button type="button" color="secondary" on:click={add} outline>+</Button>
+			<Button type="button" color="secondary" on:click={remove} disabled={list.length == 0} outline={list.length != 0}>-</Button>
+			<Button type="submit" color="primary" outline>Submit</Button>
+		</div>
+	</Form>
+</Container>

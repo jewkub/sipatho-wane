@@ -13,11 +13,18 @@ const port = process.env.PORT || 8080, ip = process.env.IP || '0.0.0.0'
 
 import { google } from 'googleapis'
 import authorize from './auth.js'
-import sendEmail, { DateFormat, getEmailList } from './email.js'
+import sendEmail, { DateFormat, getEmailList, getSheetId } from './email.js'
 
 const HOME_URL = process.env.HOME_URL || 'https://sipatho-wane.as.r.appspot.com/'
 
+const auth = await authorize()
+const sheetId = await getSheetId(google.sheets({ version: 'v4', auth }))
+
 app.use(express.urlencoded({ extended: true }))
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*")
+  next()
+})
 
 app.get('/mail', async (req, res) => {
   try {
@@ -50,7 +57,21 @@ app.post('/add', async (req, res) => {
     const timestamp = new Date().toString()
     const auth = await authorize()
     const sheets = google.sheets({ version: 'v4', auth })
-    // console.log(req.body)
+    if (req.body.type) {
+      if (sheetId['Others'] === undefined) throw new Error('sheet "Others" not found')
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetId['Others'],
+        range: 'รายการแลกเวร!A2:B2',
+        valueInputOption: 'USER_ENTERED',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values: [[timestamp, req.body.type, req.body.details]]
+        },
+      })
+      res.send('success')
+      return ;
+    }
+    if (sheetId[req.body.hospital] === undefined) throw new Error('hospital name error')
     const reducedValues = req.body.values.reduce((prev, e) => [
       ...prev,
       [
@@ -73,9 +94,10 @@ app.post('/add', async (req, res) => {
     reducedValues[reducedValues.length-1].push(`=HYPERLINK("${notifyMailUrl}", "ส่งเมลแจ้งเตือนแลกเวรสำเร็จ")`)
 
     const emailList = await getEmailList(sheets)
+    if (emailList[req.body.values[0].requestName] === undefined) throw new Error('email not found error')
 
     await sheets.spreadsheets.values.append({
-      spreadsheetId: '1VqKnfCXOyuCbAbIOhGghUKUId-ULjPL446JzyM99Uok',
+      spreadsheetId: sheetId[req.body.hospital],
       range: 'รายการแลกเวร!A2:H',
       valueInputOption: 'USER_ENTERED',
       insertDataOption: 'INSERT_ROWS',
@@ -105,8 +127,8 @@ app.get('/name', async (req, res) => {
     const auth = await authorize()
     const sheets = google.sheets({version: 'v4', auth})
     const values = (await sheets.spreadsheets.values.get({
-      spreadsheetId: '1VqKnfCXOyuCbAbIOhGghUKUId-ULjPL446JzyM99Uok',
-      range: '20Mar-11Jun!A1:EZ',
+      spreadsheetId: sheetId[req.query.hospital],
+      range: '12Jun-3Sep!A1:EZ',
     })).data.values
     const name = values
       ?.filter(col => col?.at(0) == subspe)[0]

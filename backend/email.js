@@ -11,6 +11,11 @@ export const getEmailList = async sheets => (await sheets.spreadsheets.values.ge
   range: 'email!A2:B',
 })).data.values.reduce((prev, e) => Object.assign(prev, { [e[0]]: e[1] }), {})
 
+export const getSheetId = async sheets => (await sheets.spreadsheets.values.get({
+  spreadsheetId: process.env.METADATA_SHEET || '1sAEQ02k3NQdCO9uqdQ1Y3dL30JxTpYPf06KI4493_hc',
+  range: 'metadata!A2:B',
+})).data.values.reduce((prev, e) => Object.assign(prev, { [e[0]]: e[1] }), {})
+
 // https://stackoverflow.com/a/74408510
 const EMAIL_SENDER = process.env.GMAIL_EMAIL_ADDRESS || 'siisopatho@gmail.com'
 const EMAIL_ADMIN = process.env.EMAIL_ADMIN || 'jew.napat@gmail.com'
