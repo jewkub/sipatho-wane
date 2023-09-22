@@ -18,7 +18,7 @@ export const getSheetId = async sheets => (await sheets.spreadsheets.values.get(
 
 // https://stackoverflow.com/a/74408510
 const EMAIL_SENDER = process.env.GMAIL_EMAIL_ADDRESS || 'siisopatho@gmail.com'
-const EMAIL_ADMIN = process.env.EMAIL_ADMIN || 'jew.napat@gmail.com'
+const EMAIL_ADMIN = process.env.EMAIL_ADMIN || 'panadda.2410@gmail.com'
 import MailComposer from 'nodemailer/lib/mail-composer/index.js' // https://stackoverflow.com/a/68621282
 
 function streamToString (stream) {
@@ -51,10 +51,53 @@ const res = await gmail.users.messages.send({
   return res.data
 }
 
-let messagePayload = query => ({
-  formSubmit: {
-    subject: `มีคำขอแลกเวร ที่ ${query.hospital} จากอาจารย์ ${query.list[0].requestName}`,
-    text: 
+let messagePayload = query => {
+  switch (query.template) {
+    case 'part-off': return {
+      subject: `มีคำขอ part-time แจ้ง off เวร`,
+      text:
+`สวัสดีค่ะ อาจารย์ ${query.name}
+มีคำขอ off เวรจากท่าน ในวันที่ ${DateFormat(query.startDate)} ถึงวันที่ ${DateFormat(query.endDate)}
+subspe ${query.subspe}
+
+ขอบพระคุณมากค่ะ
+น้องบอทแลกเวร`,
+      to: query.to,
+      cc: EMAIL_ADMIN,
+      from: EMAIL_SENDER,
+    }
+
+    case 'frozen': return {
+      subject: `มีคำขอแลก frozen`,
+      text:
+`สวัสดีค่ะ อาจารย์ ${query.requestName}
+มีคำขอแลกเวร frozen จากอาจารย์ ${query.requestName} ในวันที่ ${DateFormat(query.date)}
+กอง frozen ${query.group} แลกกับอาจารย์ ${query.responseName}
+
+ขอบพระคุณมากค่ะ
+น้องบอทแลกเวร`,
+      to: query.to,
+      cc: EMAIL_ADMIN,
+      from: EMAIL_SENDER,
+    }
+
+    case 'full-off': return {
+      subject: `มีคำขอ ${query.hospital}`,
+      text:
+`สวัสดีค่ะ อาจารย์ ${query.name}
+มีคำขอ off เวรจากท่าน ในวันที่ ${DateFormat(query.startDate)} ถึงวันที่ ${DateFormat(query.endDate)}
+โดยรายละเอียดคือ ${query.details}
+
+ขอบพระคุณมากค่ะ
+น้องบอทแลกเวร`,
+      to: query.to,
+      cc: EMAIL_ADMIN,
+      from: EMAIL_SENDER,
+    }
+
+    case 'surgical': return {
+      subject: `มีคำขอแลกเวร ที่ ${query.hospital} จากอาจารย์ ${query.list[0].requestName}`,
+      text: 
 `สวัสดีค่ะ อาจารย์ ${query.list[0].requestName}
 มีคำขอแลกเวรดังนี้
 
@@ -68,14 +111,15 @@ ${query.list
 
 ขอบพระคุณมากค่ะ
 น้องบอทแลกเวร`,
-    to: query.to,
-    cc: EMAIL_ADMIN,
-    from: EMAIL_SENDER,
-    // attachments: [{filename: 'doc.pdf', path: './doc.pdf'}]
-  },
-  waneSwapped: {
-    subject: 'แลกเวรเรียบร้อย',
-    text: 
+      to: query.to,
+      cc: EMAIL_ADMIN,
+      from: EMAIL_SENDER,
+      // attachments: [{filename: 'doc.pdf', path: './doc.pdf'}]
+    }
+
+    case 'waneSwapped': return {
+      subject: 'แลกเวรเรียบร้อย',
+      text: 
 `แลกเวรสำเร็จ ที่ ${query.hospital} ตารางเวรที่เปลี่ยนแปลงเป็นดังนี้
 
 ${query.list
@@ -83,10 +127,11 @@ ${query.list
 อาจารย์ ${e.requestName} อยู่วันที่ ${DateFormat(e.responseDate)}, subspe ${e.responseSubspe}`)
   .join('\n\n')}
 `,
-    to: query.to,
-    cc: EMAIL_ADMIN,
-    from: EMAIL_SENDER,
+      to: query.to,
+      cc: EMAIL_ADMIN,
+      from: EMAIL_SENDER,
+    }
   }
-})[query.template]
+}
 
 export default sendEmail

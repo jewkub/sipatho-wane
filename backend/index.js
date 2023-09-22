@@ -53,65 +53,105 @@ app.get('/', (_req, res) => {
 })
 
 app.post('/add', async (req, res) => {
+  console.log(req.body)
   try {
     const timestamp = new Date().toString()
     const auth = await authorize()
     const sheets = google.sheets({ version: 'v4', auth })
-    if (req.body.type) {
-      if (sheetId['Others'] === undefined) throw new Error('sheet "Others" not found')
-      await sheets.spreadsheets.values.append({
-        spreadsheetId: sheetId['Others'],
-        range: 'รายการแลกเวร!A2:B2',
-        valueInputOption: 'USER_ENTERED',
-        insertDataOption: 'INSERT_ROWS',
-        requestBody: {
-          values: [[timestamp, req.body.type, req.body.details]]
-        },
-      })
-      res.send('success')
-      return ;
-    }
-    if (sheetId[req.body.hospital] === undefined) throw new Error('hospital name error')
-    const reducedValues = req.body.values.reduce((prev, e) => [
-      ...prev,
-      [
-        timestamp,
-        e.requestName,
-        DateFormat(e.requestDate),
-        e.requestSubspe,
-        e.responseName,
-        DateFormat(e.responseDate),
-        e.responseSubspe,
-      ]
-    ], [])
-    const notifyMailUrl = new URL(`/mail?hospital=${req.body.hospital}&${req.body.values
-      .map((value, i) =>
-        Object
-          .keys(value)
-          .map(e => `values[${i+1}][${e}]=${value[e]}`)
-          .join('&'))
-      .join('&')}`, HOME_URL).href
-    reducedValues[reducedValues.length-1].push(`=HYPERLINK("${notifyMailUrl}", "ส่งเมลแจ้งเตือนแลกเวรสำเร็จ")`)
-
+    if (sheetId['Form submit'] === undefined) throw new Error('hospital name error')
     const emailList = await getEmailList(sheets)
-    if (emailList[req.body.values[0].requestName] === undefined) throw new Error('email not found error')
 
-    await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId[req.body.hospital],
-      range: 'รายการแลกเวร!A2:H',
+    const sheetAppend = data => sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId['Form submit'],
+      range: data.range,
       valueInputOption: 'USER_ENTERED',
       insertDataOption: 'INSERT_ROWS',
       requestBody: {
-        values: reducedValues
+        values: data.values
       },
     })
-    await sendEmail(auth, {
-      hospital: req.body.hospital,
-      // form: 'si',
-      to: emailList[req.body.values[0].requestName],
-      template: 'formSubmit',
-      list: req.body.values,
-    })
+
+    if (req.body.hospital === 'Part-time off') {
+      await sheetAppend({
+        range: 'Part-time off!A2:E',
+        values: [[timestamp, req.body.name, req.body.startDate, req.body.endDate, req.body.subspe]]
+      })
+      await sendEmail(auth, {
+        hospital: req.body.hospital,
+        to: emailList[req.body.name],
+        template: 'part-off',
+        name: req.body.name,
+        startDate: DateFormat(req.body.startDate),
+        endDate: DateFormat(req.body.endDate),
+        subspe: req.body.subspe,
+      })
+    }
+    else if (req.body.hospital === 'Frozen') {
+      // const notifyMailUrl = new URL(`/mail?hospital=${req.body.hospital}&requestName=${req.body.requestName}&date=${req.body.date}&group=${req.body.group}&responseName=${req.body.responseName}`, HOME_URL).href
+      await sheetAppend({
+        range: 'Frozen!A2:E',
+        values: [[timestamp, req.body.requestName, req.body.date, req.body.group, req.body.responseName]]
+      })
+      await sendEmail(auth, {
+        hospital: req.body.hospital,
+        to: emailList[req.body.requestName],
+        template: 'frozen',
+        requestName: req.body.requestName,
+        date: DateFormat(req.body.date),
+        group: req.body.group,
+        responseName: req.body.responseName,
+      })
+    }
+    else if (req.body.hospital === 'Full-time off cytology' || req.body.hospital === 'Full-time off autopsy') {
+      await sheetAppend({
+        range: `${req.body.hospital}!A2:E`,
+        values: [[timestamp, req.body.name, req.body.startDate, req.body.endDate, req.body.details]]
+      })
+      await sendEmail(auth, {
+        hospital: req.body.hospital,
+        to: emailList[req.body.name],
+        template: 'full-off',
+        name: req.body.name,
+        startDate: DateFormat(req.body.startDate),
+        endDate: DateFormat(req.body.endDate),
+        details: req.body.details,
+      })
+    }
+    else if (req.body.hospital === 'Surgical S, SG, SP' || req.body.hospital === 'Surgical SiPH') {
+      if (emailList[req.body.values[0].requestName] === undefined) throw new Error('email not found error')
+      const reducedValues = req.body.values.reduce((prev, e) => [
+        ...prev,
+        [
+          timestamp,
+          e.requestName,
+          DateFormat(e.requestDate),
+          e.requestSubspe,
+          e.responseName,
+          DateFormat(e.responseDate),
+          e.responseSubspe,
+        ]
+      ], [])
+      const notifyMailUrl = new URL(`/mail?hospital=${req.body.hospital}&${req.body.values
+        .map((value, i) =>
+          Object
+            .keys(value)
+            .map(e => `values[${i+1}][${e}]=${value[e]}`)
+            .join('&'))
+        .join('&')}`, HOME_URL).href
+      reducedValues[reducedValues.length-1].push(`=HYPERLINK("${notifyMailUrl}", "ส่งเมลแจ้งเตือนแลกเวรสำเร็จ")`)
+
+      await sheetAppend({
+        range: `${req.body.hospital}!A2:H`,
+        values: reducedValues
+      })
+      await sendEmail(auth, {
+        hospital: req.body.hospital,
+        to: emailList[req.body.values[0].requestName],
+        template: 'surgical',
+        list: req.body.values,
+      })
+    }
+    else throw new Error('hospital unknown')
     res.send('success')
   } catch (e) {
     console.error(e)

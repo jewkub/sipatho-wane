@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { OptionList } from '../optionList'
 	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public'
-	import { Order } from '../order'
+	import Order from '../order'
 	import OrderList from '../Order.svelte'
-	import { Form, Input, Label, Button, Col, Row, Container, Accordion, AccordionItem } from 'sveltestrap'
+	import { Form, Input, Button, Container, Accordion } from 'sveltestrap'
+	import hospitalList from '../hospitalList'
 
-	const hospital = 'Surgical S, SG, SP'
+	const hospital = hospitalList['si']!
 	let list: Order[] = []
 
 	const add = () => {
@@ -30,14 +30,14 @@
 </script>
 
 <svelte:head>
-	<title>SI - แลกเวรพาโถ</title>
+	<title>{hospital} - แลกเวรพาโถ</title>
 	<meta name="description" content="About this app" />
 </svelte:head>
 
 <Container>
 	<h1>แลกเวร - {hospital}</h1>
 	<Form action="{PUBLIC_BACKEND_HOSTNAME + 'add'}" method="post" enctype="application/x-www-form-urlencoded">
-		<Input type="text" value="Surgical S, SG, SP" style="display: none;" name="hospital" readonly required/>
+		<Input type="text" value={hospital} style="display: none;" name="hospital" readonly required/>
 		<Accordion class="mb-3">
 			{#each list as e (e.index)}
 				<OrderList order={e} hospital={hospital}/>

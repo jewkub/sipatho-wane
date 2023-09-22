@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Form, Input, Label, Button, Col, Row, Container, Accordion, AccordionItem } from 'sveltestrap';
-  import { OptionList } from './optionList'
+	import { Input, Label, Button, Col, Row, AccordionItem } from 'sveltestrap';
+  import OptionList from './optionList'
 	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public';
-  import type { Order } from './order'
+  import type Order from './order'
 
   export let order: Order
 	export let hospital: string

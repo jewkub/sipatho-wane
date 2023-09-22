@@ -1,4 +1,4 @@
-export class Order {
+export default class Order {
   active: boolean = true
   index: number
   requestDate: string = ''

@@ -1,4 +1,4 @@
-export const OptionList = [
+export default [
   'Renal biopsy',
   'Nervous system',
   'Eye (part-time)',
