@@ -13,12 +13,12 @@ const port = process.env.PORT || 8080, ip = process.env.IP || '0.0.0.0'
 
 import { google } from 'googleapis'
 import authorize from './auth.js'
-import sendEmail, { DateFormat, getEmailList, getSheetId } from './email.js'
+import sendEmail, { DateFormat, getEmailList, getMetadata } from './email.js'
 
 const HOME_URL = process.env.HOME_URL || 'https://sipatho-wane.as.r.appspot.com/'
 
 const auth = await authorize()
-const sheetId = await getSheetId(google.sheets({ version: 'v4', auth }))
+const metadata = await getMetadata(google.sheets({ version: 'v4', auth }))
 
 app.use(express.urlencoded({ extended: true }))
 app.use((req, res, next) => {
@@ -31,8 +31,8 @@ app.get('/mail', async (req, res) => {
     const auth = await authorize()
     const sheets = google.sheets({ version: 'v4', auth })
     const query = qs.parse(req.query)
-    // console.log(query.values)
 
+    const metadata = await getMetadata(sheets)
     const emailList = await getEmailList(sheets)
 
     await sendEmail(auth, {
@@ -40,6 +40,11 @@ app.get('/mail', async (req, res) => {
       to: emailList[query.values[0].requestName],
       template: 'waneSwapped',
       list: query.values,
+      from: metadata['Email sender'],
+      cc: [
+        metadata['Email admin1'],
+        metadata['Email admin2'],
+      ],
     })
     res.send('done')
   } catch (e) {
@@ -58,11 +63,18 @@ app.post('/add', async (req, res) => {
     const timestamp = new Date().toString()
     const auth = await authorize()
     const sheets = google.sheets({ version: 'v4', auth })
-    if (sheetId['Form submit'] === undefined) throw new Error('hospital name error')
+    const metadata = await getMetadata(sheets)
+    if (metadata['Form submit'] === undefined) throw new Error('hospital name error')
+    if (metadata['Email sender'] === undefined) throw new Error('sender name not found')
+    if (metadata['Email admin1'] === undefined) throw new Error('admin name not found')
+    const sender = metadata['Email sender'], admins = [
+      metadata['Email admin1'],
+      metadata['Email admin2'],
+    ]
     const emailList = await getEmailList(sheets)
 
     const sheetAppend = data => sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId['Form submit'],
+      spreadsheetId: metadata['Form submit'],
       range: data.range,
       valueInputOption: 'USER_ENTERED',
       insertDataOption: 'INSERT_ROWS',
@@ -84,6 +96,8 @@ app.post('/add', async (req, res) => {
         startDate: DateFormat(req.body.startDate),
         endDate: DateFormat(req.body.endDate),
         subspe: req.body.subspe,
+        from: sender,
+        cc: admins,
       })
     }
     else if (req.body.hospital === 'Frozen') {
@@ -100,6 +114,8 @@ app.post('/add', async (req, res) => {
         date: DateFormat(req.body.date),
         group: req.body.group,
         responseName: req.body.responseName,
+        from: sender,
+        cc: admins,
       })
     }
     else if (req.body.hospital === 'Full-time off cytology' || req.body.hospital === 'Full-time off autopsy') {
@@ -115,6 +131,8 @@ app.post('/add', async (req, res) => {
         startDate: DateFormat(req.body.startDate),
         endDate: DateFormat(req.body.endDate),
         details: req.body.details,
+        from: sender,
+        cc: admins,
       })
     }
     else if (req.body.hospital === 'Surgical S, SG, SP' || req.body.hospital === 'Surgical SiPH') {
@@ -149,10 +167,13 @@ app.post('/add', async (req, res) => {
         to: emailList[req.body.values[0].requestName],
         template: 'surgical',
         list: req.body.values,
+        from: sender,
+        cc: admins,
       })
     }
     else throw new Error('hospital unknown')
-    res.send('success')
+    // res.send('success')
+    res.redirect('https://sipatho-wane.netlify.app/success')
   } catch (e) {
     console.error(e)
     res.send('[error]')
@@ -167,7 +188,7 @@ app.get('/name', async (req, res) => {
     const auth = await authorize()
     const sheets = google.sheets({version: 'v4', auth})
     const values = (await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId[req.query.hospital],
+      spreadsheetId: metadata[req.query.hospital],
       range: '12Jun-3Sep!A1:EZ',
     })).data.values
     const name = values

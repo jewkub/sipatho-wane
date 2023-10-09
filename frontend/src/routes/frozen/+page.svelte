@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public'
-	import doctorList from '../doctorList'
+	import { fulltime } from '../doctorList'
 	import { Form, Input, Label, Button, Container } from 'sveltestrap'
 	import hospitalList from '../hospitalList'
 	const type = 'frozen'
@@ -26,7 +26,7 @@
 		<Label for="requestName">ชื่อผู้ขอแลก</Label>
 		<Input class="mb-3" type="select" id="requestName" name="requestName" required>
 			<option disabled selected value="">เลือก</option>
-			{#each doctorList as e}
+			{#each fulltime as e}
 				<option value={e}>{e}</option>
 			{/each}
 		</Input>
@@ -42,7 +42,7 @@
 		<Label for="responseName">ชื่อผู้รับแลก</Label>
 		<Input class="mb-3" type="select" id="responseName" name="responseName" required>
 			<option disabled selected value="">เลือก</option>
-			{#each doctorList as e}
+			{#each fulltime as e}
 				<option value={e}>{e}</option>
 			{/each}
 		</Input>

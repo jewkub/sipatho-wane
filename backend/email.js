@@ -6,19 +6,19 @@ export const DateFormat = date => new Intl.DateTimeFormat('en-GB', {
   month: 'short',
 }).format(new Date(date))
 
+const metadataSheet = process.env.METADATA_SHEET || '1sAEQ02k3NQdCO9uqdQ1Y3dL30JxTpYPf06KI4493_hc'
+
 export const getEmailList = async sheets => (await sheets.spreadsheets.values.get({
-  spreadsheetId: process.env.METADATA_SHEET || '1sAEQ02k3NQdCO9uqdQ1Y3dL30JxTpYPf06KI4493_hc',
+  spreadsheetId: metadataSheet,
   range: 'email!A2:B',
 })).data.values.reduce((prev, e) => Object.assign(prev, { [e[0]]: e[1] }), {})
 
-export const getSheetId = async sheets => (await sheets.spreadsheets.values.get({
-  spreadsheetId: process.env.METADATA_SHEET || '1sAEQ02k3NQdCO9uqdQ1Y3dL30JxTpYPf06KI4493_hc',
+export const getMetadata = async sheets => (await sheets.spreadsheets.values.get({
+  spreadsheetId: metadataSheet,
   range: 'metadata!A2:B',
 })).data.values.reduce((prev, e) => Object.assign(prev, { [e[0]]: e[1] }), {})
 
 // https://stackoverflow.com/a/74408510
-const EMAIL_SENDER = process.env.GMAIL_EMAIL_ADDRESS || 'siisopatho@gmail.com'
-const EMAIL_ADMIN = process.env.EMAIL_ADMIN || 'panadda.2410@gmail.com'
 import MailComposer from 'nodemailer/lib/mail-composer/index.js' // https://stackoverflow.com/a/68621282
 
 function streamToString (stream) {
@@ -52,8 +52,14 @@ const res = await gmail.users.messages.send({
 }
 
 let messagePayload = query => {
+  let output = {
+    to: query.to,
+    cc: query.cc,
+    from: query.from,
+  }
+
   switch (query.template) {
-    case 'part-off': return {
+    case 'part-off': return Object.assign(output, {
       subject: `มีคำขอ part-time แจ้ง off เวร`,
       text:
 `สวัสดีค่ะ อาจารย์ ${query.name}
@@ -62,12 +68,9 @@ subspe ${query.subspe}
 
 ขอบพระคุณมากค่ะ
 น้องบอทแลกเวร`,
-      to: query.to,
-      cc: EMAIL_ADMIN,
-      from: EMAIL_SENDER,
-    }
+    })
 
-    case 'frozen': return {
+    case 'frozen': return Object.assign(output, {
       subject: `มีคำขอแลก frozen`,
       text:
 `สวัสดีค่ะ อาจารย์ ${query.requestName}
@@ -76,12 +79,9 @@ subspe ${query.subspe}
 
 ขอบพระคุณมากค่ะ
 น้องบอทแลกเวร`,
-      to: query.to,
-      cc: EMAIL_ADMIN,
-      from: EMAIL_SENDER,
-    }
+    })
 
-    case 'full-off': return {
+    case 'full-off': return Object.assign(output, {
       subject: `มีคำขอ ${query.hospital}`,
       text:
 `สวัสดีค่ะ อาจารย์ ${query.name}
@@ -90,12 +90,9 @@ subspe ${query.subspe}
 
 ขอบพระคุณมากค่ะ
 น้องบอทแลกเวร`,
-      to: query.to,
-      cc: EMAIL_ADMIN,
-      from: EMAIL_SENDER,
-    }
+    })
 
-    case 'surgical': return {
+    case 'surgical': return Object.assign(output, {
       subject: `มีคำขอแลกเวร ที่ ${query.hospital} จากอาจารย์ ${query.list[0].requestName}`,
       text: 
 `สวัสดีค่ะ อาจารย์ ${query.list[0].requestName}
@@ -111,13 +108,9 @@ ${query.list
 
 ขอบพระคุณมากค่ะ
 น้องบอทแลกเวร`,
-      to: query.to,
-      cc: EMAIL_ADMIN,
-      from: EMAIL_SENDER,
-      // attachments: [{filename: 'doc.pdf', path: './doc.pdf'}]
-    }
+    })
 
-    case 'waneSwapped': return {
+    case 'waneSwapped': return Object.assign(output, {
       subject: 'แลกเวรเรียบร้อย',
       text: 
 `แลกเวรสำเร็จ ที่ ${query.hospital} ตารางเวรที่เปลี่ยนแปลงเป็นดังนี้
@@ -127,10 +120,7 @@ ${query.list
 อาจารย์ ${e.requestName} อยู่วันที่ ${DateFormat(e.responseDate)}, subspe ${e.responseSubspe}`)
   .join('\n\n')}
 `,
-      to: query.to,
-      cc: EMAIL_ADMIN,
-      from: EMAIL_SENDER,
-    }
+    })
   }
 }
 
