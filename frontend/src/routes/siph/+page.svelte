@@ -37,12 +37,12 @@
 <Container>
 	<h1>แลกเวร - {hospital}</h1>
 	<Form action="{PUBLIC_BACKEND_HOSTNAME + 'add'}" method="post" enctype="application/x-www-form-urlencoded">
-	<Input type="text" value={hospital} style="display: none;" name="hospital" readonly required />
-		<Accordion class="mb-3">
+		<Input type="text" value={hospital} style="display: none;" name="hospital" readonly required />
+		<div class="accordion mb-3" id="accordion">
 			{#each list as e (e.index)}
 				<OrderList order={e} hospital={hospital}/>
 			{/each}
-		</Accordion>
+		</div>
 		<div class="mb-3">
 			<Button type="button" color="secondary" on:click={add} outline>+</Button>
 			<Button type="button" color="secondary" on:click={remove} disabled={list.length == 0} outline={list.length != 0}>-</Button>

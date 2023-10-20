@@ -1,3 +1,9 @@
 runtime: nodejs20
 automatic_scaling:
   max_instances: 2
+env_variables:
+  TZ: "Asia/Bangkok"
+  URL_BACKEND: "https://sipatho-wane.as.r.appspot.com/"
+  URL_FRONTEND: "https://sipatho-wane.netlify.app/"
+  METADATA_SHEET: "1sAEQ02k3NQdCO9uqdQ1Y3dL30JxTpYPf06KI4493_hc"
+

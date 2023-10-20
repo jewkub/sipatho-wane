@@ -9,4 +9,5 @@
 
 <Container>
 	<h1>แลกเวร</h1>
+	<h3 style="text-align: center;">กดเลือกเมนูที่ด้านบนเพื่อกรอกฟอร์มแลกเวร</h3>
 </Container>

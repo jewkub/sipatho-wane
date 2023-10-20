@@ -6,18 +6,6 @@ export const DateFormat = date => new Intl.DateTimeFormat('en-GB', {
   month: 'short',
 }).format(new Date(date))
 
-const metadataSheet = process.env.METADATA_SHEET || '1sAEQ02k3NQdCO9uqdQ1Y3dL30JxTpYPf06KI4493_hc'
-
-export const getEmailList = async sheets => (await sheets.spreadsheets.values.get({
-  spreadsheetId: metadataSheet,
-  range: 'email!A2:B',
-})).data.values.reduce((prev, e) => Object.assign(prev, { [e[0]]: e[1] }), {})
-
-export const getMetadata = async sheets => (await sheets.spreadsheets.values.get({
-  spreadsheetId: metadataSheet,
-  range: 'metadata!A2:B',
-})).data.values.reduce((prev, e) => Object.assign(prev, { [e[0]]: e[1] }), {})
-
 // https://stackoverflow.com/a/74408510
 import MailComposer from 'nodemailer/lib/mail-composer/index.js' // https://stackoverflow.com/a/68621282
 
@@ -30,7 +18,7 @@ function streamToString (stream) {
   })
 }
 
-async function sendEmail(auth, query) {
+export async function sendEmail(auth, query) {
   const gmail = google.gmail({version: 'v1', auth})
   let mail = new MailComposer(messagePayload(query))
   let stream = mail.compile().createReadStream()
@@ -70,12 +58,24 @@ subspe ${query.subspe}
 น้องบอทแลกเวร`,
     })
 
-    case 'frozen': return Object.assign(output, {
-      subject: `มีคำขอแลก frozen`,
+    case 'frozen-in': return Object.assign(output, {
+      subject: `มีคำขอแลก frozen ในเวลา`,
       text:
 `สวัสดีค่ะ อาจารย์ ${query.requestName}
 มีคำขอแลกเวร frozen จากอาจารย์ ${query.requestName} ในวันที่ ${DateFormat(query.date)}
 กอง frozen ${query.group} แลกกับอาจารย์ ${query.responseName}
+
+ขอบพระคุณมากค่ะ
+น้องบอทแลกเวร`,
+    })
+
+    case 'frozen-out': return Object.assign(output, {
+      subject: `มีคำขอแลก frozen นอกเวลา`,
+      text:
+`สวัสดีค่ะ อาจารย์ ${query.requestName}
+มีคำขอแลกเวร frozen จากอาจารย์ ${query.requestName} ในวันที่ ${DateFormat(query.date)}
+รายละเอียดเพิ่มเติมดังนี้
+${query.detail}
 
 ขอบพระคุณมากค่ะ
 น้องบอทแลกเวร`,
@@ -123,5 +123,3 @@ ${query.list
     })
   }
 }
-
-export default sendEmail

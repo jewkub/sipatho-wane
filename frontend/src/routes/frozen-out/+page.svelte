@@ -3,15 +3,8 @@
 	import { fulltime } from '../doctorList'
 	import { Form, Input, Label, Button, Container } from 'sveltestrap'
 	import hospitalList from '../hospitalList'
-	const type = 'frozen'
+	const type = 'frozen-out'
 	const hospital = hospitalList[type]!
-	const frozenGroup = [
-		'Frozen ทั่วไป คิว 1',
-		'Frozen ทั่วไป คิว 2',
-		'Gyne frozen',
-		'OR Neuro frozen',
-		'OR Ortho (Bone/Soft tissue)',
-	]
 </script>
 
 <svelte:head>
@@ -32,20 +25,8 @@
 		</Input>
 		<Label for="date">วันที่</Label>
 		<Input class="mb-3" type="date" placeholder="วันที่" id="date" name="date" required/>
-		<Label for="group">กอง frozen</Label>
-		<Input class="mb-3" type="select" id="group" name="group" required>
-			<option disabled selected value="">เลือก</option>
-			{#each frozenGroup as e}
-				<option value={e}>{e}</option>
-			{/each}
-		</Input>
-		<Label for="responseName">ชื่อผู้รับแลก</Label>
-		<Input class="mb-3" type="select" id="responseName" name="responseName" required>
-			<option disabled selected value="">เลือก</option>
-			{#each fulltime as e}
-				<option value={e}>{e}</option>
-			{/each}
-		</Input>
+		<Label for="detail">รายละเอียด</Label>
+		<Input class="mb-3" type="textarea" id="detail" name="detail" required/>
 		<div class="mb-3">
 			<Button type="submit" color="primary" outline>Submit</Button>
 		</div>

@@ -74,7 +74,7 @@ async function authorize() {
  * Lists the labels in the user's account.
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
- */
+ *
 async function listLabels(auth) {
   const gmail = google.gmail({version: 'v1', auth});
   const res = await gmail.users.labels.list({
@@ -91,6 +91,7 @@ async function listLabels(auth) {
   });
 }
 
-authorize().catch(console.error);
+
+authorize().catch(console.error);*/
 
 export default authorize
