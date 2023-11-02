@@ -46,7 +46,7 @@
 		<div class="mb-3">
 			<Button type="button" color="secondary" on:click={add} outline>+</Button>
 			<Button type="button" color="secondary" on:click={remove} disabled={list.length == 0} outline={list.length != 0}>-</Button>
-			<Button type="submit" color="primary" outline>Submit</Button>
+			<Button type="submit" color={list.length == 0 ? "secondary" : "primary"} disabled={list.length == 0} outline={list.length != 0}>Submit</Button>
 		</div>
 	</Form>
 </Container>

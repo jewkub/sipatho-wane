@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Input, Label, Button, Col, Row, AccordionItem } from 'sveltestrap';
-	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public';
+	import { Input, Label, Button, Col, Row, AccordionItem } from 'sveltestrap'
+	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public'
   import type Order from './order'
 
   export let order: Order

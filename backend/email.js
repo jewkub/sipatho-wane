@@ -40,61 +40,50 @@ const res = await gmail.users.messages.send({
 }
 
 let messagePayload = query => {
-  let output = {
-    to: query.to,
-    cc: query.cc,
-    from: query.from,
-  }
-
-  switch (query.template) {
-    case 'part-off': return Object.assign(output, {
-      subject: `มีคำขอ part-time แจ้ง off เวร`,
-      text:
+  let output
+  if (query.template == 'part-off') output = {
+    subject: `มีคำขอ part-time แจ้ง off เวร`,
+    text:
 `สวัสดีค่ะ อาจารย์ ${query.name}
 มีคำขอ off เวรจากท่าน ในวันที่ ${DateFormat(query.startDate)} ถึงวันที่ ${DateFormat(query.endDate)}
-subspe ${query.subspe}
+subspe ${query.subspe}`,
+  }
 
-ขอบพระคุณมากค่ะ
-น้องบอทแลกเวร`,
-    })
+  else if (query.template == 'frozen-in') output = {
+    subject: `มีคำขอแลกเวร frozen ในเวลา`,
+    text:
+`สวัสดีค่ะ อาจารย์ ${query.list[0].requestName}
+มีคำขอแลกเวร frozen ดังนี้
 
-    case 'frozen-in': return Object.assign(output, {
-      subject: `มีคำขอแลก frozen ในเวลา`,
-      text:
-`สวัสดีค่ะ อาจารย์ ${query.requestName}
-มีคำขอแลกเวร frozen จากอาจารย์ ${query.requestName} ในวันที่ ${DateFormat(query.date)}
-กอง frozen ${query.group} แลกกับอาจารย์ ${query.responseName}
+${query.list
+.map((e, i) => `${i+1}. อาจารย์ ${e.requestName}, วันที่ ${DateFormat(e.requestDate)}
+กอง ${e.group} ขอแลกกับ
+อาจารย์ ${e.responseName}, วันที่ ${DateFormat(e.responseDate)}`)
+.join('\n\n')}
 
-ขอบพระคุณมากค่ะ
-น้องบอทแลกเวร`,
-    })
+โปรดตรวจสอบข้อมูล หากดำเนินการแลกเรียบร้อยจะส่งอีเมลแจ้งอีกรอบ`,
+  }
 
-    case 'frozen-out': return Object.assign(output, {
-      subject: `มีคำขอแลก frozen นอกเวลา`,
-      text:
+  else if (query.template == 'frozen-out') output = {
+    subject: `มีคำขอแลกเวร frozen นอกเวลา`,
+    text:
 `สวัสดีค่ะ อาจารย์ ${query.requestName}
 มีคำขอแลกเวร frozen จากอาจารย์ ${query.requestName} ในวันที่ ${DateFormat(query.date)}
 รายละเอียดเพิ่มเติมดังนี้
-${query.detail}
+${query.detail}`,
+  }
 
-ขอบพระคุณมากค่ะ
-น้องบอทแลกเวร`,
-    })
-
-    case 'full-off': return Object.assign(output, {
-      subject: `มีคำขอ ${query.hospital}`,
-      text:
+  else if (query.template == 'full-off') output = {
+    subject: `มีคำขอแลกเวร ${query.hospital}`,
+    text:
 `สวัสดีค่ะ อาจารย์ ${query.name}
 มีคำขอ off เวรจากท่าน ในวันที่ ${DateFormat(query.startDate)} ถึงวันที่ ${DateFormat(query.endDate)}
-โดยรายละเอียดคือ ${query.details}
-
-ขอบพระคุณมากค่ะ
-น้องบอทแลกเวร`,
-    })
-
-    case 'surgical': return Object.assign(output, {
-      subject: `มีคำขอแลกเวร ที่ ${query.hospital} จากอาจารย์ ${query.list[0].requestName}`,
-      text: 
+โดยรายละเอียดคือ ${query.details}`,
+  }
+  
+  else if (query.template == 'surgical') output = {
+    subject: `มีคำขอแลกเวร ที่ ${query.hospital} จากอาจารย์ ${query.list[0].requestName}`,
+    text: 
 `สวัสดีค่ะ อาจารย์ ${query.list[0].requestName}
 มีคำขอแลกเวรดังนี้
 
@@ -104,22 +93,39 @@ ${query.list
 อาจารย์ ${e.responseName}, วันที่ ${DateFormat(e.responseDate)}, subspe ${e.responseSubspe}`)
   .join('\n\n')}
 
-โปรดตรวจสอบข้อมูล หากดำเนินการแลกเรียบร้อยจะส่งอีเมลแจ้งอีกรอบ
+โปรดตรวจสอบข้อมูล หากดำเนินการแลกเรียบร้อยจะส่งอีเมลแจ้งอีกรอบ`,
+  }
 
-ขอบพระคุณมากค่ะ
-น้องบอทแลกเวร`,
-    })
-
-    case 'waneSwapped': return Object.assign(output, {
-      subject: 'แลกเวรเรียบร้อย',
-      text: 
-`แลกเวรสำเร็จ ที่ ${query.hospital} ตารางเวรที่เปลี่ยนแปลงเป็นดังนี้
+  else if (query.template == 'wane-swapped') output = {
+    subject: 'แลกเวรเรียบร้อย',
+    text: 
+`แลกเวรสำเร็จ ที่ ${query.hospital} รายการเวรที่เปลี่ยนแปลงเป็นดังนี้
 
 ${query.list
-  .map((e, i) => `${i+1}. อาจารย์ ${e.responseName} อยู่วันที่ ${DateFormat(e.requestDate)}, subspe ${e.requestSubspe}
-อาจารย์ ${e.requestName} อยู่วันที่ ${DateFormat(e.responseDate)}, subspe ${e.responseSubspe}`)
-  .join('\n\n')}
-`,
-    })
+  .map((e, i) => `${i+1}. subspe ${e.requestSubspe}
+อาจารย์ ${e.responseName} อยู่วันที่ ${DateFormat(e.requestDate)}
+อาจารย์ ${e.requestName} อยู่วันที่ ${DateFormat(e.responseDate)}`)
+  .join('\n\n')}`,
   }
+
+  else if (query.template == 'frozen-swapped') output = {
+    subject: 'แลกเวรเรียบร้อย',
+    text:
+`แลกเวรสำเร็จ ที่ ${query.hospital} รายการเวรที่เปลี่ยนแปลงเป็นดังนี้
+
+${query.list
+  .map((e, i) => `${i+1}. กอง ${e.group}
+อาจารย์ ${e.responseName} อยู่วันที่ ${DateFormat(e.requestDate)}
+อาจารย์ ${e.requestName} อยู่วันที่ ${DateFormat(e.responseDate)}`)
+  .join('\n\n')}`,
+  }
+
+  const signature = `\n\nขอบพระคุณมากค่ะ\nน้องบอทแลกเวร`
+
+  output.text += signature
+  return Object.assign(output, {
+    to: query.to,
+    cc: query.cc,
+    from: query.from,
+  })
 }

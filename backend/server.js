@@ -28,14 +28,19 @@ app.use((_req, res, next) => {
 app.get('/mail', async (req, res) => {
   try {
     const query = qs.parse(req.query)
-    const cc = query.values.map(e => emailList[e.responseName]).concat([
+    let cc = query.values.map(e => emailList[e.responseName]).concat([
       metadata['Email admin1'],
-      metadata['Email admin2'],
     ])
+    // พี่วัฒไม่เอา surgical
+    if (query.hospital !== 'Surgical S, SG, SP' && query.hospital !== 'Surgical SiPH') {
+      cc = cc.concat([
+        metadata['Email admin2'],
+      ])
+    }
     await sendEmail(auth, {
       hospital: query.hospital,
       to: emailList[query.values[0].requestName],
-      template: 'waneSwapped',
+      template: query.hospital == 'Frozen office hour' ? 'frozen-swapped' : 'wane-swapped',
       list: query.values,
       from: metadata['Email sender'],
       cc: cc,
@@ -88,18 +93,35 @@ app.post('/add', async (req, res) => {
       })
     }
     else if (req.body.hospital === 'Frozen office hour') {
+      if (emailList[req.body.values[0].requestName] === undefined) throw new Error('email not found error')
+      const reducedValues = req.body.values.reduce((prev, e) => [
+        ...prev,
+        [
+          timestamp,
+          e.requestName,
+          DateFormat(e.requestDate),
+          e.group,
+          e.responseName,
+          DateFormat(e.responseDate),
+        ]
+      ], [])
+      const notifyMailUrl = new URL(`/mail?hospital=${req.body.hospital}&${req.body.values
+        .map((value, i) =>
+          Object
+            .keys(value)
+            .map(e => `values[${i+1}][${e}]=${value[e]}`)
+            .join('&'))
+        .join('&')}`, URL_BACKEND).href
+      reducedValues[reducedValues.length-1].push(`=HYPERLINK("${notifyMailUrl}", "ส่งเมลแจ้งเตือนแลกเวรสำเร็จ")`)
       await sheetAppend({
-        range: 'Frozen office hour!A2:E',
-        values: [[timestamp, req.body.requestName, req.body.date, req.body.group, req.body.responseName]],
+        range: 'Frozen office hour!A2:G',
+        values: reducedValues,
       })
       await sendEmail(auth, {
         hospital: req.body.hospital,
-        to: emailList[req.body.requestName],
+        to: emailList[req.body.values[0].requestName],
         template: 'frozen-in',
-        requestName: req.body.requestName,
-        date: DateFormat(req.body.date),
-        group: req.body.group,
-        responseName: req.body.responseName,
+        list: req.body.values,
         from: sender,
         cc: admins,
       })
@@ -170,7 +192,7 @@ app.post('/add', async (req, res) => {
         template: 'surgical',
         list: req.body.values,
         from: sender,
-        cc: admins,
+        cc: metadata['Email admin1'], // พี่วัฒไม่เอา surgical
       })
     }
     else throw new Error('hospital unknown')
