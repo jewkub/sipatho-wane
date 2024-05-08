@@ -1,6 +1,6 @@
 <script>
 	import Header from './Header.svelte'
-	import { Container, Styles } from 'sveltestrap'
+	import { Container, Styles } from '@sveltestrap/sveltestrap'
 	import './styles.css'
 </script>
 

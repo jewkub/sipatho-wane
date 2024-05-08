@@ -25,6 +25,10 @@ app.use((_req, res, next) => {
   next()
 })
 
+app.get('/test', async (req, res) => {
+  res.json(metadata)
+})
+
 app.get('/mail', async (req, res) => {
   try {
     const query = qs.parse(req.query)
@@ -210,7 +214,7 @@ app.get('/name', async (req, res) => {
 
     const values = (await sheets.get({
       spreadsheetId: metadata[req.query.hospital],
-      range: `${metadata[req.query.hospital + ' - sheetname']}!A1:EZ`,
+      range: `${metadata[req.query.hospital + ' - sheetname']}!A1:ZZZ`,
     })).data.values
     const name = values
       ?.filter(col => col?.at(0) == subspe)[0]

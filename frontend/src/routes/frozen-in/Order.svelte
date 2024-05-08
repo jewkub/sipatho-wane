@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Input, Label, Button, Col, Row, AccordionItem } from 'sveltestrap'
+  import { Input, Label, Button, Col, Row, AccordionItem } from '@sveltestrap/sveltestrap'
   import { fulltime } from '../doctorList'
   export let index: number
 	const frozenGroup = [

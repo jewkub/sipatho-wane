@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Input, Label, Button, Col, Row, AccordionItem } from 'sveltestrap'
+	import { Input, Label, Button, Col, Row, AccordionItem } from '@sveltestrap/sveltestrap'
 	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public'
   import type Order from './order'
 

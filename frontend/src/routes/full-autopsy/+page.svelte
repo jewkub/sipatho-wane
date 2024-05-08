@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public'
-	import { Form, Input, Label, Button, Col, Row, Container } from 'sveltestrap'
+	import { Form, Input, Label, Button, Col, Row, Container } from '@sveltestrap/sveltestrap'
 	import hospitalList from '../hospitalList'
 	import { fulltime } from '../doctorList'
 	const type = 'full-autopsy'

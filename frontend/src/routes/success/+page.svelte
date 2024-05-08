@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public'
-	import { Form, Input, Button, Container, Row, Col, Label } from 'sveltestrap'
+	import { Form, Input, Button, Container, Row, Col, Label } from '@sveltestrap/sveltestrap'
 </script>
 
 <svelte:head>

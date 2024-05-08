@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public'
 	import { fulltime } from '../doctorList'
-	import { Form, Input, Label, Button, Container } from 'sveltestrap'
+	import { Form, Input, Label, Button, Container } from '@sveltestrap/sveltestrap'
 	import hospitalList from '../hospitalList'
 	const type = 'frozen-out'
 	const hospital = hospitalList[type]!

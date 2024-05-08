@@ -3,7 +3,7 @@
 	import { PUBLIC_BACKEND_HOSTNAME } from '$env/static/public'
 	import Order from '../order'
 	import OrderList from '../Order.svelte'
-	import { Form, Input, Button, Container, Accordion } from 'sveltestrap'
+	import { Form, Input, Button, Container, Accordion } from '@sveltestrap/sveltestrap'
 	import hospitalList from '../hospitalList'
   
 	const hospital = hospitalList['siph']!

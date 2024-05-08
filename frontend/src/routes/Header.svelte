@@ -8,7 +8,7 @@
     Nav,
     NavItem,
     NavLink,
-  } from 'sveltestrap'
+  } from '@sveltestrap/sveltestrap'
 	import routes from './hospitalList'
 	// const routes: Record<string, string> = {
 	// 	si: 'SI',

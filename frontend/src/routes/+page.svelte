@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Container } from 'sveltestrap'
+	import { Container } from '@sveltestrap/sveltestrap'
 </script>
 
 <svelte:head>
