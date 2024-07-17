@@ -1,10 +1,16 @@
 import { google } from 'googleapis'
 
-export const DateFormat = date => new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  year: '2-digit',
-  month: 'short',
-}).format(new Date(date))
+export const DateFormat = date => [
+  new Intl.DateTimeFormat('en-US', {
+    day: 'numeric',
+  }).format(new Date(date)),
+  new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+  }).format(new Date(date)),
+  new Intl.DateTimeFormat('en-US', {
+    year: '2-digit',
+  }).format(new Date(date)),
+].join(' ')
 
 // https://stackoverflow.com/a/74408510
 import MailComposer from 'nodemailer/lib/mail-composer/index.js' // https://stackoverflow.com/a/68621282
